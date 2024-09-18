@@ -1,10 +1,14 @@
-import { View, Text, TextInput, TouchableOpacity, Image } from 'react-native'
+import { View, Text, TextInput, TouchableOpacity, Image, Alert } from 'react-native'
 import React from 'react'
 import { useState } from 'react'
 import {icons} from '../constants'
+import { usePathname } from 'expo-router'
+import { router } from 'expo-router'
 
-const SearchInput = ({title, value, placeholder, handleChangeText, otherStyles, ...props}) => {
-  const [showPassword, setshowPassword] = useState(false)
+
+const SearchInput = ({initialQuery}) => {
+  const pathname = usePathname();
+  const [query, setQuery] = useState(initialQuery ||'')
 
   
   return (
@@ -14,26 +18,29 @@ const SearchInput = ({title, value, placeholder, handleChangeText, otherStyles, 
       focus:border-secondary items-center flex-row space-x-4">
         <TextInput
           className="text-base  mt-0.5 text-white flex-1 font-pregular"
-          value={value}
+          value={query}
           placeholder="Search for a video topic"
-          placeholderTextColor="#7B7B8B"
-          onChangeText={handleChangeText}
-          secureTextEntry={title === "Password" && !showPassword}
+          placeholderTextColor="#CDCDE0"
+          onChangeText={(e) => setQuery(e)}
+          
         />
 
-        <TouchableOpacity>
-            <Image 
-            source={icons.search}
-            className="w-5 h-5"
-            resizeMode='contain'
-            />
-        </TouchableOpacity>
+        <TouchableOpacity
+        onPress={() => {
+          if (!query)
+            return Alert.alert(
+              "Missing Query",
+              "Please input something to search results across database"
+            );
 
-        
+          if (pathname.startsWith("/search")) router.setParams({ query });
+          else router.push(`/search/${query}`);
+        }}
+        >
+        <Image source={icons.search} className="w-5 h-5" resizeMode="contain" />
+      </TouchableOpacity>
+    </View>
+  );
+};
 
-      </View>
-   
-  )
-}
-
-export default SearchInput
+export default SearchInput;
